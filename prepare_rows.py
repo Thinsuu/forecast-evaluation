@@ -1,17 +1,20 @@
 import sys
 import json
+from datetime import date, datetime
 from pathlib import Path
 
 def prepare_forecast(file_path):
-    if "forecast" not in file_path.name:
-        print("The file name does not contain 'forecast'. Exiting.")
-        return
-
     with open(file_path, 'r') as file:
         data = json.load(file)
     
     day_series = data['daySerie']
-
+    reference_time = datetime.fromisoformat(data['referenceTime'][:-1])
+    for day in day_series:
+        for entry in day['data']:
+            local_date = datetime.fromisoformat(entry['localDate'][:-1])
+            time_difference = local_date - reference_time
+            time_dif_hours = int(time_difference.seconds/60/60)
+            print(f"{entry['localDate']}  {time_dif_hours}    {entry['t']}")
 
 def prepare_historical(file_path):
     with open(file_path, 'r') as file:

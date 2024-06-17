@@ -58,3 +58,19 @@ It can easily happen that the data we want is not from the official website (the
 
       2024-06-16T10:00    17.3
       2024-06-16T11:00    19.0
+
+- In prepare_rows.py, when you call it with `forecast` json like this:
+      
+      python3 prepare_rows.py raw_data/forecast_20240615230233.json
+  
+  It should print rows of:
+  - forecast datetime (localDate)
+  - difference from the time when the forecast was generated (referenceTime), in hours
+  - temperature (t)
+  
+  Like this:
+
+      2024-06-16T10:00    1h    17.3
+      2024-06-16T11:00    2h    19.0
+      2024-06-16T12:00    3h    21.0
+
