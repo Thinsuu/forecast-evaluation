@@ -2,6 +2,9 @@ import sys
 import json
 from datetime import date, datetime
 from pathlib import Path
+from typing import List, Tuple
+
+import pytz
 
 def prepare_forecast(file_path):
     with open(file_path, 'r') as file:
@@ -16,20 +19,71 @@ def prepare_forecast(file_path):
             time_dif_hours = int(time_difference.seconds/60/60)
             print(f"{entry['localDate']}  {time_dif_hours}    {entry['t']}")
 
-def prepare_historical(file_path):
+def list_files(starting_name):
+    directory = 'raw_data'
+    dir_path = Path(directory)
+
+    forecast_files = [file for file in dir_path.glob('*') if starting_name in file.name]
+    return forecast_files
+
+def extract_data_forecast_file(file_path):
     with open(file_path, 'r') as file:
         data = json.load(file)
-
+    
     day_series = data['daySerie']
+    reference_time = datetime.fromisoformat(data['referenceTime'][:-1])
+    reference_time = reference_time.replace(tzinfo=pytz.utc)
+    stockholm_tz = pytz.timezone('Europe/Stockholm')
+    reference_time = reference_time.astimezone(stockholm_tz)
+
+    extracted_data = []
 
     for day in day_series:
         for entry in day['data']:
-            print(f"{entry['localDate']}    {entry['t']}")
+            local_date = datetime.fromisoformat(entry['localDate'][:-1])
+            local_date = local_date.replace(tzinfo=stockholm_tz)
+            time_difference = local_date - reference_time
+            time_dif_hours = int(time_difference.seconds/60/60)
+            time_dif_hours += time_difference.days * 24
+            temperature = float(entry['t'])
+            extracted_data.append((local_date, time_dif_hours, temperature))
+    return extracted_data
+            
+def forecast_dataset_prep():
+    forecast_files = list_files('forecast')
+    dataset_forecast = set()
 
+    for file in forecast_files:
+        file_data = extract_data_forecast_file(file)
+        dataset_forecast.update(file_data)
+    return dataset_forecast
+
+def extract_data_historical_file(file_path):
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    
+    day_series = data['daySerie']
+    extracted_data = []
+
+    for day in day_series:
+        for entry in day['data']:
+            local_date = entry['localDate']
+            temperature = float(entry['t'])
+            extracted_data.append((local_date, temperature))
+    return extracted_data
+
+def historical_dataset_prep():
+    historical_files = list_files('historical')
+    dataset_historical = set()
+
+    for file in historical_files:
+        file_data = extract_data_historical_file(file)
+        dataset_historical.update(file_data)
+    return dataset_historical
 
 def prepare_rows(file_path):
     if "historical" in file_path.name:
-        prepare_historical(file_path)
+        extract_data_historical_file(file_path)
     elif "forecast" in file_path.name:
         prepare_forecast(file_path)
     else:
@@ -38,16 +92,25 @@ def prepare_rows(file_path):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python3 prepare_rows.py <path_to_json_file>")
-        return
+    # if len(sys.argv) != 2:
+    #     print("Usage: python3 prepare_rows.py <path_to_json_file>")
+    #     return
 
-    json_path = Path(sys.argv[1])
-    if not json_path.exists():
-        print(f'{json_path} does not exist!')
-        return
+    # json_path = Path(sys.argv[1])
+    # if not json_path.exists():
+    #     print(f'{json_path} does not exist!')
+    #     return
 
-    prepare_rows(json_path)
+    # prepare_rows(json_path)
+
+    print('Historical:')
+    for row in historical_dataset_prep():
+        print(row)
+
+    print('Forecast:')
+    for row in sorted(forecast_dataset_prep()):
+        print(row)
+
 
 
 if __name__ == "__main__":
