@@ -67,7 +67,7 @@ def extract_data_historical_file(file_path):
 
     for day in day_series:
         for entry in day['data']:
-            local_date = entry['localDate']
+            local_date = datetime.fromisoformat(entry['localDate'][:-1])
             temperature = float(entry['t'])
             extracted_data.append((local_date, temperature))
     return extracted_data
