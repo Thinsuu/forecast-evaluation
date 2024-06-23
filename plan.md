@@ -74,3 +74,13 @@ It can easily happen that the data we want is not from the official website (the
       2024-06-16T11:00    2h    19.0
       2024-06-16T12:00    3h    21.0
 
+- Then the next step is to generate the data from all historical without duplicates. For that, we need to find the files which starts with 'historical' name. So, store all the historical files as a list.
+
+- Using that data, we need to prepare a dataset as tuples:
+
+Like this:
+
+      2024-06-16T18:00    20.4
+      2024-06-16T17:00    20.9
+
+- Collect all these tuples into a list of historical files
