@@ -2,11 +2,11 @@
 
 Having a page with a table that contains rows by dates with columns that show difference between weather forecast and actual weather that day and hour.
 
-| Date and time    | Actual | Diff -3h | Diff -12h | Diff -1d |
-|------------------|--------|----------|-----------|----------|
-| 2024-06-01 00:00 | +20    | 0        | -1        | +3       |
-| 2024-06-01 03:00 | +19    | +1       | +2        | 0        |
-|                  |        |          |           |          |
+| Date and time    | Actual | Diff -3h | Diff -12h | Diff -1d | Diff -3d |
+|------------------|--------|----------|-----------|----------|----------|
+| 2024-06-01 00:00 | +20    | 0        | -1        | +3       | --       |
+| 2024-06-01 03:00 | +19    | +1       | +2        | 0        | 0        |
+|                  |        |          |           |          |          |
 
 ### Steps
 

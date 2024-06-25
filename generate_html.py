@@ -4,6 +4,9 @@ from sqlalchemy.orm import aliased
 from db_definitions import session, HistoricalData, ForecastData
 
 def main():
+    """
+    Get data from DB and produce HTML with a table.
+    """
     diff_of_interest = [1, 3, 12, 24, 72]
 
     db_results = session.query(
@@ -35,10 +38,14 @@ def main():
     
     html_table = df.to_html(classes='table table-striped', border=0)
 
-    with open('table.html', 'w') as f:
-        f.write(html_table)
+    with open('./template.html', 'r') as f:
+        template_html = f.read()
+    complete_html = template_html.format(table=html_table)
 
-    print(html_table)
+    with open('table.html', 'w') as f:
+        f.write(complete_html)
+
+    # print(complete_html)
 
 if __name__ == '__main__':
     main()
