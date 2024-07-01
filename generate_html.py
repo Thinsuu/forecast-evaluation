@@ -3,12 +3,18 @@ from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import aliased
 from db_definitions import session, HistoricalData, ForecastData
 from datetime import datetime, timedelta
+from sqlalchemy import func
+
 
 def main():
     """
     Get data from DB and produce HTML with a table.
     """
     diff_of_interest = [1, 3, 12, 24, 72]
+
+    max_historical_date = session.query(func.max(HistoricalData.local_date)).scalar()
+    end_date = max_historical_date
+    start_date = end_date - timedelta(days=10)
 
     db_results = session.query(
         HistoricalData.local_date,
@@ -46,8 +52,10 @@ def main():
                     data[date][col] = f'{closest_result.forecast_temp} ({closest_result.forecast_temp - data[date]["Actual"]:.1f})'
                 else:
                     data[date][col] = '--'
-               
-    df = pd.DataFrame.from_dict(data, orient='index').sort_index()
+
+    df = pd.DataFrame.from_dict(data, orient='index').sort_index(ascending=False)
+    df = df[(df.index >= start_date) & (df.index <= end_date)]
+
     
     for diff in diff_of_interest:
         col = f'Diff -{diff}h'
