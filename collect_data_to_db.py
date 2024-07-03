@@ -7,13 +7,14 @@ def put_historical_data():
     existing_dates = [row[0] for row in existing_dates]
 
     from_json = prepare_rows.historical_dataset_prep()
-    for local_date, temperature in from_json:
+    for local_date, temperature, precipitation in from_json:
         if local_date in existing_dates:
             continue
-        print(local_date, temperature)
+        print(local_date, temperature, precipitation)
         row = HistoricalData(
             local_date=local_date,
             temperature=temperature,
+            precipitation=precipitation,
         )
         session.add(row)
 
@@ -23,7 +24,7 @@ def put_forecast_data():
         ForecastData.local_date, ForecastData.time_difference).all()
 
     from_json = prepare_rows.forecast_dataset_prep()
-    for local_date, time_dif_hours, temperature in from_json:
+    for local_date, time_dif_hours, temperature, precipitation in from_json:
         local_date = local_date.replace(tzinfo=None)
         if (local_date, time_dif_hours) in existing_dates:
             continue
@@ -31,6 +32,7 @@ def put_forecast_data():
             local_date=local_date,
             time_difference=time_dif_hours,
             temperature=temperature,
+            precipitation=precipitation,
         )
         session.add(row)
 

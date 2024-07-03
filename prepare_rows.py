@@ -6,18 +6,18 @@ from typing import List, Tuple
 
 import pytz
 
-def prepare_forecast(file_path):
-    with open(file_path, 'r') as file:
-        data = json.load(file)
+# def prepare_forecast(file_path):
+#     with open(file_path, 'r') as file:
+#         data = json.load(file)
     
-    day_series = data['daySerie']
-    reference_time = datetime.fromisoformat(data['referenceTime'][:-1])
-    for day in day_series:
-        for entry in day['data']:
-            local_date = datetime.fromisoformat(entry['localDate'][:-1])
-            time_difference = local_date - reference_time
-            time_dif_hours = int(time_difference.seconds/60/60)
-            print(f"{entry['localDate']}  {time_dif_hours}    {entry['t']}")
+#     day_series = data['daySerie']
+#     reference_time = datetime.fromisoformat(data['referenceTime'][:-1])
+#     for day in day_series:
+#         for entry in day['data']:
+#             local_date = datetime.fromisoformat(entry['localDate'][:-1])
+#             time_difference = local_date - reference_time
+#             time_dif_hours = int(time_difference.seconds/60/60)
+#             print(f"{entry['localDate']}  {time_dif_hours}    {entry['t']}")
 
 def list_files(starting_name):
     directory = 'raw_data'
@@ -46,7 +46,8 @@ def extract_data_forecast_file(file_path):
             time_dif_hours = int(time_difference.seconds/60/60)
             time_dif_hours += time_difference.days * 24
             temperature = float(entry['t'])
-            extracted_data.append((local_date, time_dif_hours, temperature))
+            precipitation = float(entry['tp'])
+            extracted_data.append((local_date, time_dif_hours, temperature, precipitation))
     return extracted_data
             
 def forecast_dataset_prep():
@@ -69,7 +70,8 @@ def extract_data_historical_file(file_path):
         for entry in day['data']:
             local_date = datetime.fromisoformat(entry['localDate'][:-1])
             temperature = float(entry['t'])
-            extracted_data.append((local_date, temperature))
+            precipitation = float(entry.get('prec1h', 0))
+            extracted_data.append((local_date, temperature, precipitation))
     return extracted_data
 
 def historical_dataset_prep():
@@ -81,14 +83,14 @@ def historical_dataset_prep():
         dataset_historical.update(file_data)
     return dataset_historical
 
-def prepare_rows(file_path):
-    if "historical" in file_path.name:
-        extract_data_historical_file(file_path)
-    elif "forecast" in file_path.name:
-        prepare_forecast(file_path)
-    else:
-        print("The file name should contain 'historical' or 'foreccast'. Exiting.")
-        return
+# def prepare_rows(file_path):
+#     if "historical" in file_path.name:
+#         extract_data_historical_file(file_path)
+#     elif "forecast" in file_path.name:
+#         prepare_forecast(file_path)
+#     else:
+#         print("The file name should contain 'historical' or 'foreccast'. Exiting.")
+#         return
 
 
 def main():
