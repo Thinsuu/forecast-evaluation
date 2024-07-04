@@ -47,7 +47,8 @@ def extract_data_forecast_file(file_path):
             time_dif_hours += time_difference.days * 24
             temperature = float(entry['t'])
             precipitation = float(entry['tp'])
-            extracted_data.append((local_date, time_dif_hours, temperature, precipitation))
+            wind_speed = float(entry['ws'])
+            extracted_data.append((local_date, time_dif_hours, temperature, precipitation, wind_speed))
     return extracted_data
             
 def forecast_dataset_prep():
@@ -71,7 +72,8 @@ def extract_data_historical_file(file_path):
             local_date = datetime.fromisoformat(entry['localDate'][:-1])
             temperature = float(entry['t'])
             precipitation = float(entry.get('prec1h', 0))
-            extracted_data.append((local_date, temperature, precipitation))
+            wind_speed = float(entry['ws'])
+            extracted_data.append((local_date, temperature, precipitation, wind_speed))
     return extracted_data
 
 def historical_dataset_prep():

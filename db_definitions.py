@@ -8,12 +8,16 @@ class HistoricalData(Base):
     __tablename__ = 'historical_data'
     local_date = Column(DateTime, primary_key=True)
     temperature = Column(Float)
+    precipitation = Column(Float)
+    wind_speed = Column(Float)
 
 class ForecastData(Base):
     __tablename__ = 'forecast_data'
     local_date = Column(DateTime)
     time_difference = Column(Integer)
     temperature = Column(Float)
+    precipitation = Column(Float)
+    wind_speed = Column(Float)
     __table_args__ = (
         PrimaryKeyConstraint('local_date', 'time_difference', name='forecast_data_pk'),
     )
