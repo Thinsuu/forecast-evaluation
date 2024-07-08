@@ -1,0 +1,135 @@
+<html>
+    <head>
+      <script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
+      <script src="https://cdn.anychart.com/releases/v8/js/anychart-ui.min.js"></script>
+      <script src="https://cdn.anychart.com/releases/v8/js/anychart-exports.min.js"></script>
+      <script src="https://cdn.anychart.com/releases/v8/js/anychart-sparkline.min.js"></script>
+      <script src="https://cdn.anychart.com/releases/v8/js/anychart-table.min.js"></script>
+      <script src="https://cdn.anychart.com/releases/v8/js/anychart-data-adapter.min.js"></script>
+      <link href="https://cdn.anychart.com/releases/v8/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
+      <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
+      <style type="text/css">
+    
+        html,
+        body,
+        #container {
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
+      
+    </style>
+    </head>
+    <body>
+      
+      <div id="container"></div>
+      <script>
+    
+        anychart.onDocumentReady(function () {
+          // The data used in this sample can be obtained from the CDN
+          // https://cdn.anychart.com/samples/sparkline-charts/column-chart/data.json
+          anychart.data.loadJsonFile(
+            'http://localhost:8000/result.json',
+            function (data) {
+              // set of colors and fonts used in this demo
+              var fontFamilyText = '\'Verdana\', Helvetica, Arial, sans-serif';
+              var headerFontColor = '#545f69';
+              var borderColor = '#CECECE';
+    
+              // create table for sparkline charts layout
+              var table = anychart.standalones.table();
+              // set table size settings
+              table.bounds('5%', '20px', '90%', '90%');
+    
+              // set table contents (sparkline charts and text)
+              var table_contents = [
+                [
+                  'Date',
+                  'Actual',
+                  'Temperature trend',
+                ]
+              ];
+            
+              for (let [key, value] of Object.entries(data)) {
+                table_contents.push([
+                    key,
+                    value['Actual'],
+                    createLine(value, 'Forecast'),
+                ])
+              };
+
+              table.contents(table_contents);
+    
+              // span [0,1] and [0,2] cell
+              //table.getCell(0, 1).colSpan(2);
+              // disable borders for all cells in the table
+              table.cellBorder(null);
+              // set dashed bottom border for all cells in the table
+              table.cellBorder().bottom({ color: borderColor, dash: '1 1' });
+    
+              // set default text settings for the table
+              table
+                .hAlign('center')
+                .vAlign('middle')
+                .fontSize('12px')
+                .fontFamily(fontFamilyText);
+    
+              // set fixed height for the first row
+              table.getRow(0).height(40).fontColor(headerFontColor);
+    
+              // set fixed width for some of the tables columns
+              table.getCol(0).width(90).hAlign('left');
+              table.getCol(1).width(65);
+              table.getCol(2).width(20).cellBorder().bottom('none');
+            //   table.getCol(4).width(65);
+            //   table.getCol(6).width(20).cellBorder().bottom('none');
+            //   table.getCol(7).width(65);
+    
+              // set container id for the table
+              table.container('container');
+              // draw the table and all elements it contains
+              // (you don't need to call the draw method for internal tables and charts)
+              table.draw();
+            }
+          );
+        });
+    
+        /**
+         * Helper function, creates sparkline chart with Line type using anychart.sparkline method,
+         * sets passed data and visual preference.
+         * @param {Object.<string, Array>} data Sparkline data.
+         * @param {string} field Data field
+         * @return {anychart.charts.Sparkline} New sparkline chart with passed data.
+         */
+        function createLine(data, field) {
+          var sparkline = anychart.sparkline(data[field]);
+          sparkline.seriesType('line');
+          sparkline.height('100%');
+          sparkline.margin().top('5%');
+          sparkline.margin().bottom('5%');
+          sparkline.padding(0);
+          return sparkline;
+        }
+    
+        /**
+         * Helper function, creates sparkline chart with Bar type using anychart.sparkline method,
+         * sets passed data and visual preference.
+         * @param {Object.<string, Array>} data Sparkline data.
+         * @param {string} field Data field
+         * @return {anychart.charts.Sparkline} New sparkline chart with passed data.
+         */
+        function createColumn(data, field) {
+          var sparkline = anychart.sparkline(data[field]);
+          sparkline.seriesType('column');
+          sparkline.height('100%');
+          sparkline.margin().top('5%');
+          sparkline.margin().bottom('5%');
+          sparkline.padding(0);
+          return sparkline;
+        }
+      
+    </script>
+    </body>
+    </html>
+                    
