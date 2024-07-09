@@ -1,6 +1,10 @@
+import os
+
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, PrimaryKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+DB_MODE = os.environ.get('DB_MODE', 'sqlite')
 
 Base = declarative_base()
 
@@ -22,7 +26,22 @@ class ForecastData(Base):
         PrimaryKeyConstraint('local_date', 'time_difference', name='forecast_data_pk'),
     )
 
-engine = create_engine('sqlite:///weather_data.db')
+
+if DB_MODE == 'postgresql':
+    print('Using PostgreSQL')
+    db_username = os.environ.get('DB_USER')
+    db_password = os.environ.get('DB_PASSWORD')
+    db_address = os.environ.get('DB_ADDRESS')
+
+    if not all([db_username, db_password, db_address]):
+        raise ValueError('Please provide all DB_USER, DB_PASSWORD, DB_ADDRESS!')
+
+    engine = create_engine(f'postgresql://{db_username}:{db_password}@{db_address}/forecast_evaluation')
+else:
+    print('Using SQLite')
+    engine = create_engine('sqlite:///weather_data.db')
+
+
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 

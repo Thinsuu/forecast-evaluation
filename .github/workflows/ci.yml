@@ -1,0 +1,70 @@
+name: Weather Collection and Page Publishing Workflow
+
+on:
+  push:
+    branches:
+      - '*'
+  schedule:
+    - cron: '*/30 * * * *'
+
+jobs:
+  collect_data:
+    runs-on: ubuntu-latest
+    container: python:3.8
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Run data collection
+        run: |
+          python download_smhi.py
+          python collect_data_to_db.py
+        env:
+          DB_MODE: ${{ vars.DB_MODE }}
+          DB_ADDRESS: ${{ secrets.DB_ADDRESS }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+  publish_page:
+    needs: collect_data
+    runs-on: ubuntu-latest
+    container: python:3.8
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Run HTML generation
+        run: python generate_html.py
+        env:
+          DB_MODE: ${{ vars.DB_MODE }}
+          DB_ADDRESS: ${{ secrets.DB_ADDRESS }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.PUBLISH_TOKEN }}
+          publish_dir: ./publish
+
+      - name: Save artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: publish
+          path: publish/
