@@ -177,4 +177,4 @@ def produce_html():
 if __name__ == '__main__':
     OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
     prepare_json()
-    shutil.copy(Path(__file__).parent / 'anychart_template.html', OUTPUT_DIR / 'trend.html')
+    shutil.copy(Path(__file__).parent / 'anychart_template.html', OUTPUT_DIR / 'index.html')
