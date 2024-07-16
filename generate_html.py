@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import math
 import shutil
 from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import aliased
@@ -13,11 +14,11 @@ OUTPUT_DIR = Path('publish')
 
 
 def prepare_json():
-    diff_of_interest = list(range(1, 100, 2))
+    diff_of_interest = list(range(2, 100))
 
     max_historical_date = session.query(func.max(HistoricalData.local_date)).scalar()
     end_date = max_historical_date
-    start_date = end_date - timedelta(days=10)
+    start_date = (end_date - timedelta(days=10)).replace(hour=0)
 
     db_results = session.query(
         HistoricalData.local_date,
@@ -34,28 +35,12 @@ def prepare_json():
 
     data = {}
     for result in db_results:
-        if result.time_difference not in diff_of_interest:
-            continue
         date = result.local_date
         if date not in data:
             data[date] = {'Actual': result.actual_temp}
-
-    for date in data.keys():
-        for diff_time in diff_of_interest:
-            col = f'Diff -{diff_time}h'
-            if col not in data[date]:
-                closest_result = None
-                closest_diff = None
-                for result in db_results:
-                    if result.local_date == date:
-                        if closest_diff is None or abs(result.time_difference - diff_time) < closest_diff:
-                            closest_diff = abs(result.time_difference - diff_time)
-                            closest_result = result
-
-                if closest_result:
-                    data[date][col] = (data[date]["Actual"] / closest_result.forecast_temp) * 100.0 - 100.0
-                else:
-                    data[date][col] = None
+            for diff_time in diff_of_interest:
+                data[date][diff_time] = None
+        data[date][result.time_difference] = (data[date]["Actual"] / result.forecast_temp) * 100.0 - 100.0
 
     df = pd.DataFrame.from_dict(data, orient='index')
     df = df.rename_axis('actual_date').reset_index()
@@ -65,7 +50,10 @@ def prepare_json():
     output_data = {
         date.strftime('%Y-%m-%d'): {
             'Actual': f'{values_dict["Actual"]:.1f}',
-            'Trend': list(round(v, 2) for k, v in values_dict.items() if 'Diff' in k),
+            'Trend': list(
+                (None if math.isnan(v) else round(v, 2))
+                for k, v in values_dict.items() if k != 'Actual'
+            ),
         }
         for date, values_dict in df.to_dict('index').items()
     }
