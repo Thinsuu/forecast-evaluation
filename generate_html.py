@@ -22,14 +22,14 @@ def prepare_json():
     db_results = session.query(
         HistoricalData.local_date,
         HistoricalData.temperature.label('actual_temp'),
-        ForecastData.local_date.label('forecast_date'),
         ForecastData.temperature.label('forecast_temp'),
         ForecastData.time_difference
     ).join(
         ForecastData,
         ForecastData.local_date == HistoricalData.local_date
     ).filter(
-        HistoricalData.local_date >= start_date
+        HistoricalData.local_date >= start_date,
+        ForecastData.time_difference <= max(diff_of_interest),
     ).all()
 
     data = {}
@@ -39,25 +39,6 @@ def prepare_json():
         date = result.local_date
         if date not in data:
             data[date] = {'Actual': result.actual_temp}
-            # data[date]['Forecast'].append(result.forecast_temp)
-        #data[date][f'Diff -{result.time_difference}h'] = f'{result.forecast_temp} ({result.forecast_temp - result.actual_temp:.1f})'
-
-    # for date in data.keys():
-    #     for diff in diff_of_interest:
-    #         closest_result = None
-    #         closest_diff = None
-    #         for result in db_results:
-    #             if result.local_date == date:
-    #                 if closest_diff is None or abs(result.time_difference - diff) < closest_diff:
-    #                     closest_diff = abs(result.time_difference - diff)
-    #                     closest_result = result
-
-    #         if closest_result:
-    #             data[date]['Forecast'].append(closest_result.forecast_temp)
-    #         else:
-    #             data[date]['Forecast'].append(None)
-
-    # sorted_data = dict(sorted(data.items(), key=lambda item: item[0], reverse=True))
 
     for date in data.keys():
         for diff_time in diff_of_interest:
@@ -91,18 +72,6 @@ def prepare_json():
 
     with open(OUTPUT_DIR / 'result.json', 'w') as f:
         json.dump(output_data, f, indent=2)
-
-    # {
-    #     "2024-06-29 23:00:00": {
-    #         "Actual": 15.4,
-    #         "Forecast": [15.1, 14.3, 14.3, 16.3, 14.3]
-    #     },
-    #     ...
-    # }
-   # data_dict = df.to_dict(orient='index')
-   # data_dict = {str(key): value for key, value in data_dict.items()}
-   # with open('result.json', 'w') as f:
-   #     json.dump(data_dict, f, indent=2)
 
 
 def produce_html():
