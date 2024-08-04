@@ -10,20 +10,27 @@ Base = declarative_base()
 
 class HistoricalData(Base):
     __tablename__ = 'historical_data'
-    local_date = Column(DateTime, primary_key=True)
+    city_id = Column(Integer)
+    weather_website = Column(String)
+    local_date = Column(DateTime)
     temperature = Column(Float)
     precipitation = Column(Float)
     wind_speed = Column(Float)
+    __table_args__ = (
+        PrimaryKeyConstraint('city_id', 'weather_website', 'local_date', name='historical_data_pk'),
+    )
 
 class ForecastData(Base):
     __tablename__ = 'forecast_data'
+    city_id = Column(Integer)
+    weather_website = Column(String)
     local_date = Column(DateTime)
     time_difference = Column(Integer)
     temperature = Column(Float)
     precipitation = Column(Float)
     wind_speed = Column(Float)
     __table_args__ = (
-        PrimaryKeyConstraint('local_date', 'time_difference', name='forecast_data_pk'),
+        PrimaryKeyConstraint('city_id', 'weather_website', 'local_date', 'time_difference', name='forecast_data_pk'),
     )
 
 

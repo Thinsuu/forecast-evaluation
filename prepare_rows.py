@@ -35,6 +35,8 @@ def extract_data_forecast_file(file_path):
     reference_time = reference_time.replace(tzinfo=pytz.utc)
     stockholm_tz = pytz.timezone('Europe/Stockholm')
     reference_time = reference_time.astimezone(stockholm_tz)
+    city_id = data['place']['geonameid']
+    website_name = 'SMHI'
 
     extracted_data = []
 
@@ -48,7 +50,7 @@ def extract_data_forecast_file(file_path):
             temperature = float(entry['t'])
             precipitation = float(entry['tp'])
             wind_speed = float(entry['ws'])
-            extracted_data.append((local_date, time_dif_hours, temperature, precipitation, wind_speed))
+            extracted_data.append((city_id, website_name, local_date, time_dif_hours, temperature, precipitation, wind_speed))
     return extracted_data
             
 def forecast_dataset_prep():
@@ -66,6 +68,8 @@ def extract_data_historical_file(file_path):
     
     day_series = data['daySerie']
     extracted_data = []
+    city_id = data['place']['geonameid']
+    website_name = 'SMHI'
 
     for day in day_series:
         for entry in day['data']:
@@ -73,7 +77,7 @@ def extract_data_historical_file(file_path):
             temperature = float(entry['t'])
             precipitation = float(entry.get('prec1h', 0))
             wind_speed = float(entry['ws'])
-            extracted_data.append((local_date, temperature, precipitation, wind_speed))
+            extracted_data.append((city_id, website_name, local_date, temperature, precipitation, wind_speed))
     return extracted_data
 
 def historical_dataset_prep():

@@ -25,7 +25,9 @@ jobs:
 
       - name: Run data collection
         run: |
-          python download_smhi.py
+          python download_smhi.py 2673730
+          python download_smhi.py 2711537
+          python download_smhi.py 2692969
           python collect_data_to_db.py
         env:
           DB_MODE: ${{ vars.DB_MODE }}
