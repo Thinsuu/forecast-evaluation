@@ -4,6 +4,7 @@ import math
 import shutil
 from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import aliased
+from sqlalchemy import and_
 from db_definitions import session, HistoricalData, ForecastData
 from datetime import datetime, timedelta
 from sqlalchemy import func
@@ -11,6 +12,7 @@ from pathlib import Path
 
 
 OUTPUT_DIR = Path('publish')
+CITY_ID = 2711537
 
 
 def prepare_json_temp():
@@ -27,10 +29,14 @@ def prepare_json_temp():
         ForecastData.time_difference
     ).join(
         ForecastData,
-        ForecastData.local_date == HistoricalData.local_date
+        and_(
+            ForecastData.local_date == HistoricalData.local_date,
+            ForecastData.city_id == HistoricalData.city_id,
+        )
     ).filter(
         HistoricalData.local_date >= start_date,
         ForecastData.time_difference <= max(diff_of_interest),
+        HistoricalData.city_id == CITY_ID,
     ).all()
 
     data = {}
@@ -73,10 +79,14 @@ def prepare_json_wind():
         ForecastData.time_difference
     ).join(
         ForecastData,
-        ForecastData.local_date == HistoricalData.local_date
+        and_(
+            ForecastData.local_date == HistoricalData.local_date,
+            ForecastData.city_id == HistoricalData.city_id,
+        )
     ).filter(
         HistoricalData.local_date >= start_date,
         ForecastData.time_difference <= max(diff_of_interest),
+        HistoricalData.city_id == CITY_ID,
     ).all()
 
     wind_speed_data = {}
