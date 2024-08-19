@@ -64,10 +64,6 @@
               }
 
               table.contents(table_contents);
-    
-              // span [0,1] and [0,2] cell
-              //table.getCell(0, 1).colSpan(2);
-              // disable borders for all cells in the table
               table.cellBorder(null);
               // set dashed bottom border for all cells in the table
               table.cellBorder().bottom({ color: borderColor, dash: '1 1' });
@@ -88,9 +84,6 @@
               table.getCol(2).width(400).cellBorder().bottom('none');
               table.getCol(3).width(65);
               table.getCol(4).width(400).cellBorder().bottom('none');
-            //   table.getCol(4).width(65);
-            //   table.getCol(6).width(20).cellBorder().bottom('none');
-            //   table.getCol(7).width(65);
     
               // set container id for the table
               table.container('container');
