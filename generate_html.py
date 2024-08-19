@@ -96,7 +96,10 @@ def prepare_json_wind():
             wind_speed_data[date] = {'Actual_wind': result.actual_wind_speed}
             for diff_time in diff_of_interest:
                 wind_speed_data[date][diff_time] = None
-        wind_speed_data[date][result.time_difference] = (wind_speed_data[date]["Actual_wind"] / result.forecast_wind_speed) * 100.0 - 100.0
+        if result.forecast_wind_speed != 0:
+            wind_speed_data[date][result.time_difference] = (wind_speed_data[date]["Actual_wind"] / result.forecast_wind_speed) * 100.0 - 100.0
+        else:
+            wind_speed_data[date][result.time_difference] = 0
 
     df = pd.DataFrame.from_dict(wind_speed_data, orient='index')
     df = df.rename_axis('actual_date').reset_index()
