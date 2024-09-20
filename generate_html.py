@@ -132,11 +132,41 @@ def combine_data():
     #         merged_dict[day] = {}
     #     merged_dict[day].update(data_dict)
 
-    with open(OUTPUT_DIR / 'result.json', 'w') as f:
+    json_filename = f'SMHI_{CITY_ID}.json'
+    with open(OUTPUT_DIR / json_filename, 'w') as f:
         json.dump(temp_data, f, indent=2)
 
+    with open(Path(__file__).parent / 'anychart_template.html', 'r') as f:
+        filedata = f.read()
+    
+    filedata = filedata.replace('REPLACEME_JSON_FILE_PATH', json_filename)
+
+    html_filename = f'SMHI_{CITY_ID}.html'
+    with open(OUTPUT_DIR / html_filename, 'w') as f:
+        filedata = f.write(filedata)
+
+def process_all_city_id():
+    city_ids_query = session.query(HistoricalData.city_id).distinct().all()
+    for row in city_ids_query:
+        city_id = row[0]
+        print(city_id)
+
+        global CITY_ID
+        CITY_ID = city_id
+        combine_data()
+
+    cityID_links = ""
+    for row in city_ids_query:
+        city_id = row[0]
+        cityID_links += f'<li><a href = "SMHI_{city_id}.html">{city_id} Weather</a></li>\n'
+    
+    with open(Path(__file__).parent / 'index_template.html', 'r') as f:
+        html_body = f.read()
+    html_body = html_body.replace('REPLACE_CITYID', cityID_links)
+
+    with open(OUTPUT_DIR / 'index.html', 'w') as f:
+        f.write(html_body)
 
 if __name__ == '__main__':
     OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
-    combine_data()
-    shutil.copy(Path(__file__).parent / 'anychart_template.html', OUTPUT_DIR / 'index.html')
+    process_all_city_id()
