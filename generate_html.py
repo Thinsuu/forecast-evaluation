@@ -1,7 +1,6 @@
 import json
 import pandas as pd
 import math
-import shutil
 from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import aliased
 from sqlalchemy import and_
@@ -140,6 +139,7 @@ def combine_data():
         filedata = f.read()
     
     filedata = filedata.replace('REPLACEME_JSON_FILE_PATH', json_filename)
+    filedata = filedata.replace('City_id_ToREPLACE', str(CITY_ID))
 
     html_filename = f'SMHI_{CITY_ID}.html'
     with open(OUTPUT_DIR / html_filename, 'w') as f:
