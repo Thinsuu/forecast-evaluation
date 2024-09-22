@@ -139,7 +139,7 @@ def combine_data():
         filedata = f.read()
     
     filedata = filedata.replace('REPLACEME_JSON_FILE_PATH', json_filename)
-    filedata = filedata.replace('City_id_ToREPLACE', str(CITY_ID))
+    filedata = filedata.replace('City_id_ToREPLACE', f'{from_cityId_to_name(CITY_ID)}')
 
     html_filename = f'SMHI_{CITY_ID}.html'
     with open(OUTPUT_DIR / html_filename, 'w') as f:
@@ -158,7 +158,7 @@ def process_all_city_id():
     cityID_links = ""
     for row in city_ids_query:
         city_id = row[0]
-        cityID_links += f'<li><a href = "SMHI_{city_id}.html">{city_id} Weather</a></li>\n'
+        cityID_links += f'<li><a href = "SMHI_{city_id}.html"> {from_cityId_to_name(city_id)} Weather</a></li>\n'
     
     with open(Path(__file__).parent / 'index_template.html', 'r') as f:
         html_body = f.read()
@@ -166,6 +166,15 @@ def process_all_city_id():
 
     with open(OUTPUT_DIR / 'index.html', 'w') as f:
         f.write(html_body)
+
+
+def from_cityId_to_name(city_id):
+    with open(Path(__file__).parent / 'city_names.json', 'r') as f:
+        json_contents = json.load(f)
+        city_name_only= json_contents[str(city_id)]
+    return city_name_only
+
+
 
 if __name__ == '__main__':
     OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
