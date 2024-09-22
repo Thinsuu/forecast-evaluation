@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
+      <script src="https://cdn.anychart.com/releases/v8/js/anychart-ui.min.js"></script>
+      <script src="https://cdn.anychart.com/releases/v8/js/anychart-exports.min.js"></script>
+      <script src="https://cdn.anychart.com/releases/v8/js/anychart-sparkline.min.js"></script>
+      <script src="https://cdn.anychart.com/releases/v8/js/anychart-table.min.js"></script>
+      <script src="https://cdn.anychart.com/releases/v8/js/anychart-data-adapter.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.min.js"></script>
+      <link href="https://cdn.anychart.com/releases/v8/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
+      <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
+      <style type="text/css">
+    
+        html,
+        body,
+        #container {
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
+      
+    </style>
+    </head>
+    <body>
+      <h1> SMHI forecast Stockholm: temperature prediction trend </h1>
+
+      <div>
+        <button onclick="exportTable('png')">Export as PNG</button>
+        <button onclick="exportTable('pdf')">Export as PDF</button>
+      </div>
+
+      <div id="container"></div>
+
+      <script>
+        var table;
+    
+        anychart.onDocumentReady(function () {
+          // The data used in this sample can be obtained from the CDN
+          // https://cdn.anychart.com/samples/sparkline-charts/column-chart/data.json
+          anychart.data.loadJsonFile(
+            'SMHI_2673730.json',
+            function (data) {
+              // set of colors and fonts used in this demo
+              var fontFamilyText = '\'Verdana\', Helvetica, Arial, sans-serif';
+              var headerFontColor = '#545f69';
+              var borderColor = '#CECECE';
+    
+              // create table for sparkline charts layout
+              table = anychart.standalones.table();
+              // set table size settings
+              table.bounds('1%', '5px', '90%', '90%');
+    
+              // set table contents (sparkline charts and text)
+              var table_contents = [
+                [
+                  'Date',
+                  'Temp Actual',
+                  'Temp Trend',
+                  'Wind Actual',
+                  'Wind Trend',
+                ]
+              ];
+            
+              for (let [key, value] of Object.entries(data)) {
+                table_contents.push([
+                    key,
+                    value['Temp_Actual'],
+                    createLine(value, 'Temp_Trend', 15),
+                    value['Wind_Actual'],
+                    createLine(value, 'Wind_Trend', 60),
+                ]);
+              }
+
+              table.contents(table_contents);
+              table.cellBorder(null);
+              // set dashed bottom border for all cells in the table
+              table.cellBorder().bottom({ color: borderColor, dash: '1 1' });
+    
+              // set default text settings for the table
+              table
+                .hAlign('center')
+                .vAlign('middle')
+                .fontSize('12px')
+                .fontFamily(fontFamilyText);
+    
+              // set fixed height for the first row
+              table.getRow(0).height(60).fontColor(headerFontColor);
+    
+              // set fixed width for some of the tables columns
+              table.getCol(0).width(90).hAlign('left');
+              table.getCol(1).width(65);
+              table.getCol(2).width(400).cellBorder().bottom('none');
+              table.getCol(3).width(65);
+              table.getCol(4).width(400).cellBorder().bottom('none');
+    
+              // set container id for the table
+              table.container('container');
+              // draw the table and all elements it contains
+              // (you don't need to call the draw method for internal tables and charts)
+              table.draw();
+            }
+          );
+        });
+    
+        /**
+         * Helper function, creates sparkline chart with Line type using anychart.sparkline method,
+         * sets passed data and visual preference.
+         * @param {Object.<string, Array>} data Sparkline data.
+         * @param {string} field Data field
+         * @return {anychart.charts.Sparkline} New sparkline chart with passed data.
+         */
+        
+
+        function exportTable(type)  {
+          console.log('starting0')
+          var canvas = document.createElement('canvas');
+          var context = canvas.getContext('2d');
+          var img = new Image();
+          console.log('starting1')
+          img.onload = function() {
+
+            if (type === 'png') {
+              canvas.width = img.width * 6;
+              canvas.height = img.height * 7;
+
+              context.scale(1.3, 1.8);
+              context.drawImage(img, 0, 0);
+              console.log('starting2png')
+              var a = document.createElement('a');
+              a.download = 'table_chart.png';
+              a.href = canvas.toDataURL('image/png');
+              a.click();
+            } else if (type === 'pdf')  {
+              canvas.width = img.width * 5;
+              canvas.height = img.height * 5;
+
+              context.scale(0.72, 0.75);
+              context.drawImage(img, 10, 10);
+              console.log('starting2pdf')
+              console.log('Preparing PDF download');
+              var doc = new jsPDF();
+              doc.addImage(canvas.toDataURL('image/png'), 5, 5);
+              doc.save('table_chart.pdf');
+            }
+          };
+          var svg = table.toSvg(640, 480);
+          img.src = 'data: image/svg+xml;base64,' + btoa(svg);
+        }
+
+        function createLine(data, field, max_diff) {
+          var sparkline = anychart.sparkline(data[field]);
+          sparkline.seriesType('line');
+          sparkline.height('100%');
+          sparkline.margin().top('5%');
+          sparkline.margin().bottom('5%');
+          sparkline.padding(0);
+          
+          sparkline.tooltip().enabled(true);
+          sparkline.tooltip().format(function() {
+            return 'Value: ' + this.value;
+          });
+
+          sparkline.lineMarker().value(0);
+          sparkline.rangeMarker()
+                   .from(-(max_diff / 5))
+                   .to(max_diff / 5)
+                   .fill('rgb(197,255,194)');
+          sparkline.yScale().minimum(-max_diff).maximum(max_diff)
+          return sparkline;
+        }
+      </script>
+    </body>
+    </html>
+    
+   
+                    
