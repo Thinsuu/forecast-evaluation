@@ -190,9 +190,9 @@ def process_all_city_id():
         city_id = row[0]
 
         weather_standard_setting = ""
-        if average_deviation[city_id] <= 10:
+        if average_deviation[city_id] <= 0.5:
             weather_standard_setting = "Good"
-        elif average_deviation[city_id] <= 20:
+        elif average_deviation[city_id] <= 3:
             weather_standard_setting = "So-so"
         else:
             weather_standard_setting = "Bad"
