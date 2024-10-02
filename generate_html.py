@@ -13,6 +13,9 @@ from pathlib import Path
 OUTPUT_DIR = Path('publish')
 CITY_ID = 2711537
 
+# {city_id: deviation}
+average_deviation = {}
+
 
 def prepare_json_temp():
     diff_of_interest = list(range(2, 100))
@@ -38,6 +41,24 @@ def prepare_json_temp():
         HistoricalData.city_id == CITY_ID,
     ).all()
 
+    df = pd.DataFrame(db_results, columns=['local_date', 'actual_temp', 'forecast_temp', 'time_difference'])
+    df['local_date'] = pd.to_datetime(df['local_date'])
+    last_24_hours = end_date - timedelta(hours=24)
+    df_24h = df[df['local_date'] >= last_24_hours]
+    df_12h = df_24h[df_24h['time_difference'] == 12]
+
+    if df_12h.empty:
+        print("No data available for the last 24 hours.")
+        return {}
+
+    print(df_12h)
+
+    df_12h.loc[:, "prediction_error"]  = abs((df_12h['actual_temp'] - df_12h['forecast_temp'])/ df_12h['forecast_temp']) * 100
+    temp_differ_12hr_avg = df_12h['prediction_error'].mean()
+
+    print(temp_differ_12hr_avg)
+    average_deviation[CITY_ID] = temp_differ_12hr_avg
+        
     data = {}
     for result in db_results:
         date = result.local_date
@@ -45,6 +66,7 @@ def prepare_json_temp():
             data[date] = {'Actual_temp': result.actual_temp}
             for diff_time in diff_of_interest:
                 data[date][diff_time] = None
+
         data[date][result.time_difference] = (data[date]["Actual_temp"] / result.forecast_temp) * 100.0 - 100.0
     
     df = pd.DataFrame.from_dict(data, orient='index')
@@ -63,6 +85,7 @@ def prepare_json_temp():
             for date, values_dict in df.to_dict('index').items()
         }
     return temp_output_data
+
 
 def prepare_json_wind():
     diff_of_interest = list(range(2, 100))
@@ -99,6 +122,10 @@ def prepare_json_wind():
             wind_speed_data[date][result.time_difference] = (wind_speed_data[date]["Actual_wind"] / result.forecast_wind_speed) * 100.0 - 100.0
         else:
             wind_speed_data[date][result.time_difference] = 0
+    
+    # df = pd.DataFrame.from_dict(wind_speed_data, orient='index')
+    # df.index = pd.to_datetime(df.index)
+    # df_grouped = df.groupby(df.index.date).mean()
 
     df = pd.DataFrame.from_dict(wind_speed_data, orient='index')
     df = df.rename_axis('actual_date').reset_index()
@@ -119,17 +146,11 @@ def prepare_json_wind():
     return wind_output_data
 
 
-
 def combine_data():
     temp_data = prepare_json_temp()
     wind_data = prepare_json_wind()
     for day, data_dict in wind_data.items():
         temp_data[day].update(data_dict)
-    #     temp_data[day] = 123
-    # for day, data_dict in wind_data.items():
-    #     if day not in merged_dict:
-    #         merged_dict[day] = {}
-    #     merged_dict[day].update(data_dict)
 
     json_filename = f'SMHI_{CITY_ID}.json'
     with open(OUTPUT_DIR / json_filename, 'w') as f:
@@ -147,18 +168,39 @@ def combine_data():
 
 def process_all_city_id():
     city_ids_query = session.query(HistoricalData.city_id).distinct().all()
+    print(f"City IDs query result: {city_ids_query}")
+
+    if not city_ids_query:
+        print("No city IDs found in the database.")
+        return
+
     for row in city_ids_query:
         city_id = row[0]
-        print(city_id)
+        print(f"Processing city ID: {city_id}")
 
         global CITY_ID
         CITY_ID = city_id
+
+        if CITY_ID is None:
+            print(f"Error: City_ID is NONE for row {row}")
+            continue
+
         combine_data()
+    print("Finished processing all city IDs.")
 
     cityID_links = ""
     for row in city_ids_query:
         city_id = row[0]
-        cityID_links += f'<li><a href = "SMHI_{city_id}.html"> {from_cityId_to_name(city_id)} Weather</a></li>\n'
+
+        weather_standard_setting = ""
+        if average_deviation[city_id] <= 10:
+            weather_standard_setting = "Good"
+        elif average_deviation[city_id] <= 20:
+            weather_standard_setting = "So-so"
+        else:
+            weather_standard_setting = "Bad"
+
+        cityID_links += f'<li><a href = "SMHI_{city_id}.html"> {from_cityId_to_name(city_id)} Weather</a> - {weather_standard_setting} precision</li>\n'
     
     with open(Path(__file__).parent / 'index_template.html', 'r') as f:
         html_body = f.read()
@@ -171,9 +213,15 @@ def process_all_city_id():
 def from_cityId_to_name(city_id):
     with open(Path(__file__).parent / 'city_names.json', 'r') as f:
         json_contents = json.load(f)
-        city_name_only= json_contents[str(city_id)]
-    return city_name_only
+    
+    city_id_str = str(city_id)
 
+    if city_id_str in json_contents:
+        city_name_only= json_contents[city_id_str]
+    else:
+        print(f"City ID {city_id} not found in city_names.json.")
+        city_name_only = "Unknown city"
+    return city_name_only
 
 
 if __name__ == '__main__':
