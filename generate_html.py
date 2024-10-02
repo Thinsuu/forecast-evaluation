@@ -53,7 +53,7 @@ def prepare_json_temp():
 
     print(df_12h)
 
-    df_12h.loc[:, "prediction_error"]  = abs((df_12h['actual_temp'] - df_12h['forecast_temp'])/ df_12h['forecast_temp']) * 100
+    df_12h.loc[:, "prediction_error"]  = abs(df_12h['forecast_temp'] - df_12h['actual_temp'])
     temp_differ_12hr_avg = df_12h['prediction_error'].mean()
 
     print(temp_differ_12hr_avg)
@@ -67,7 +67,7 @@ def prepare_json_temp():
             for diff_time in diff_of_interest:
                 data[date][diff_time] = None
 
-        data[date][result.time_difference] = (data[date]["Actual_temp"] / result.forecast_temp) * 100.0 - 100.0
+        data[date][result.time_difference] =  result.forecast_temp - data[date]["Actual_temp"]
     
     df = pd.DataFrame.from_dict(data, orient='index')
     df = df.rename_axis('actual_date').reset_index()
@@ -118,10 +118,7 @@ def prepare_json_wind():
             wind_speed_data[date] = {'Actual_wind': result.actual_wind_speed}
             for diff_time in diff_of_interest:
                 wind_speed_data[date][diff_time] = None
-        if result.forecast_wind_speed != 0:
-            wind_speed_data[date][result.time_difference] = (wind_speed_data[date]["Actual_wind"] / result.forecast_wind_speed) * 100.0 - 100.0
-        else:
-            wind_speed_data[date][result.time_difference] = 0
+        wind_speed_data[date][result.time_difference] = result.forecast_wind_speed - wind_speed_data[date]["Actual_wind"]
     
     # df = pd.DataFrame.from_dict(wind_speed_data, orient='index')
     # df.index = pd.to_datetime(df.index)
