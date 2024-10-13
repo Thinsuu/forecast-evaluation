@@ -4,7 +4,7 @@ import math
 from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import aliased
 from sqlalchemy import and_
-from db_definitions import session, HistoricalData, ForecastData
+from db_definitions import session, HistoricalData, ForecastData, CityName
 from datetime import datetime, timedelta
 from sqlalchemy import func
 from pathlib import Path
@@ -157,7 +157,7 @@ def combine_data():
         filedata = f.read()
     
     filedata = filedata.replace('REPLACEME_JSON_FILE_PATH', json_filename)
-    filedata = filedata.replace('City_id_ToREPLACE', f'{from_cityId_to_name(CITY_ID)}')
+    filedata = filedata.replace('City_id_ToREPLACE', f'{from_cityId_to_name(CITY_ID, "SMHI")}')
 
     html_filename = f'SMHI_{CITY_ID}.html'
     with open(OUTPUT_DIR / html_filename, 'w') as f:
@@ -197,7 +197,7 @@ def process_all_city_id():
         else:
             weather_standard_setting = "Bad"
 
-        cityID_links += f'<li><a href = "SMHI_{city_id}.html"> {from_cityId_to_name(city_id)} Weather</a> - {weather_standard_setting} precision</li>\n'
+        cityID_links += f'<li><a href = "SMHI_{city_id}.html"> {from_cityId_to_name(city_id, "SMHI")} Weather</a> - {weather_standard_setting} precision</li>\n'
     
     with open(Path(__file__).parent / 'index_template.html', 'r') as f:
         html_body = f.read()
@@ -207,18 +207,18 @@ def process_all_city_id():
         f.write(html_body)
 
 
-def from_cityId_to_name(city_id):
-    with open(Path(__file__).parent / 'city_names.json', 'r') as f:
-        json_contents = json.load(f)
-    
-    city_id_str = str(city_id)
+def from_cityId_to_name(input_city_id, website):
+    desired_city_name = session.query(
+        CityName.city_name
+    ).filter(
+        CityName.city_id == input_city_id,
+        CityName.weather_website == website,
+    ).first()
 
-    if city_id_str in json_contents:
-        city_name_only= json_contents[city_id_str]
+    if desired_city_name is not None:
+        return desired_city_name[0]
     else:
-        print(f"City ID {city_id} not found in city_names.json.")
-        city_name_only = "Unknown city"
-    return city_name_only
+        return 'N/A'
 
 
 if __name__ == '__main__':

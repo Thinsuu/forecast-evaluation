@@ -69,6 +69,7 @@ def extract_data_historical_file(file_path):
     day_series = data['daySerie']
     extracted_data = []
     city_id = data['place']['geonameid']
+    city_name = data['place']['place']
     website_name = 'SMHI'
 
     for day in day_series:
@@ -77,7 +78,7 @@ def extract_data_historical_file(file_path):
             temperature = float(entry['t'])
             precipitation = float(entry.get('prec1h', 0))
             wind_speed = float(entry['ws'])
-            extracted_data.append((city_id, website_name, local_date, temperature, precipitation, wind_speed))
+            extracted_data.append((city_id, website_name, local_date, temperature, precipitation, wind_speed, city_name))
     return extracted_data
 
 def historical_dataset_prep():

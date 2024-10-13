@@ -34,6 +34,16 @@ class ForecastData(Base):
     )
 
 
+class CityName(Base):
+    __tablename__ = 'city_name'
+    city_id = Column(Integer)
+    weather_website = Column(String)
+    city_name = Column(String)
+    __table_args__ = (
+        PrimaryKeyConstraint('city_id', 'weather_website', name='city_name_pk'),
+    )
+
+
 if DB_MODE == 'postgresql':
     print('Using PostgreSQL')
     db_username = os.environ.get('DB_USER')
