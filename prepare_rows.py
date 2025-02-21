@@ -29,7 +29,8 @@ def list_files(starting_name):
 def extract_data_forecast_file(file_path):
     with open(file_path, 'r') as file:
         data = json.load(file)
-    
+
+    city_id = data['place']['geonameid']
     if 'forecast10d' in data:
         data = data['forecast10d']
     day_series = data['daySerie']
@@ -37,7 +38,6 @@ def extract_data_forecast_file(file_path):
     reference_time = reference_time.replace(tzinfo=pytz.utc)
     stockholm_tz = pytz.timezone('Europe/Stockholm')
     reference_time = reference_time.astimezone(stockholm_tz)
-    city_id = data['place']['geonameid']
     website_name = 'SMHI'
 
     extracted_data = []
