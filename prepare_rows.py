@@ -30,6 +30,8 @@ def extract_data_forecast_file(file_path):
     with open(file_path, 'r') as file:
         data = json.load(file)
     
+    if 'forecast10d' in data:
+        data = data['forecast10d']
     day_series = data['daySerie']
     reference_time = datetime.fromisoformat(data['referenceTime'][:-1])
     reference_time = reference_time.replace(tzinfo=pytz.utc)

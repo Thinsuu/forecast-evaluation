@@ -14,7 +14,7 @@ def fetch_and_save(url, file_path):
 
 def main(city_id):
     base_url = "https://www.smhi.se/wpt-a/backend_tendayforecast_nextgen/"
-    forecast_url = f"{base_url}forecast/fetcher/{city_id}/10dFormat"
+    forecast_url = f"{base_url}forecast/fetcher/{city_id}/combined"
     historical_url = f"{base_url}analys/fetcher/{city_id}/10dFormat"
     raw_data_dir = Path('raw_data')
 
