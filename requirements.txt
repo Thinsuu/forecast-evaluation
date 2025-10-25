@@ -1,7 +1,7 @@
 charset-normalizer==3.3.2
 greenlet==3.0.3
 idna==3.7
-pandas==2.0.3
+pandas==2.3.3
 psycopg2-binary==2.9.9
 pytz==2024.1
 requests==2.32.3
