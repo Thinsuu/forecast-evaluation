@@ -12,7 +12,8 @@ def put_historical_data():
     from_json = prepare_rows.historical_dataset_prep()
     for city_id, website_name, local_date, temperature, precipitation, wind_speed, city_name in from_json:
         fromjson_cityid_cityname[city_id] = city_name
-        if (city_id, website_name, local_date) in existing_dates:
+        key_row = (city_id, website_name, local_date)
+        if key_row in existing_dates:
             continue
         print(local_date, temperature, precipitation, wind_speed)
         row = HistoricalData(
@@ -24,6 +25,7 @@ def put_historical_data():
             wind_speed=wind_speed,
         )
         session.add(row)
+        existing_dates.append(key_row)
 
     for city_id_from_dict, city_name_from_dict in fromjson_cityid_cityname.items():
         if (city_id_from_dict,) not in existing_cities_in_city_names_table:
@@ -43,7 +45,8 @@ def put_forecast_data():
     from_json = prepare_rows.forecast_dataset_prep()
     for city_id, website_name, local_date, time_dif_hours, temperature, precipitation, wind_speed in from_json:
         local_date = local_date.replace(tzinfo=None)
-        if (city_id, website_name, local_date, time_dif_hours) in existing_dates:
+        key_row = (city_id, website_name, local_date, time_dif_hours)
+        if key_row in existing_dates:
             continue
         row = ForecastData(
             city_id=city_id,
@@ -55,6 +58,7 @@ def put_forecast_data():
             wind_speed=wind_speed,
         )
         session.add(row)
+        existing_dates.append(key_row)
 
 
 def main():
