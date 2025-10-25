@@ -12,10 +12,11 @@ def fetch_and_save(url, file_path):
     else:
         print(f"Failed to fetch data from {url}, status code: {response.status_code}")
 
+
 def main(city_id):
-    base_url = "https://www.smhi.se/wpt-a/backend_tendayforecast_nextgen/"
-    forecast_url = f"{base_url}forecast/fetcher/{city_id}/combined"
-    historical_url = f"{base_url}analys/fetcher/{city_id}/10dFormat"
+    base_url = "https://wpt-a.smhi.se/backend-weatherpage"
+    forecast_url = f"{base_url}/forecast/v2025.4/{city_id}"
+    historical_url = f"{base_url}/analys/{city_id}"
     raw_data_dir = Path('raw_data')
 
     raw_data_dir.mkdir(parents=True, exist_ok=True)

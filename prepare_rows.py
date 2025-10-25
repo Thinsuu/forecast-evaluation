@@ -33,7 +33,7 @@ def extract_data_forecast_file(file_path):
     city_id = data['place']['geonameid']
     if 'forecast10d' in data:
         data = data['forecast10d']
-    day_series = data['daySerie']
+    day_series = data['days']
     reference_time = datetime.fromisoformat(data['referenceTime'][:-1])
     reference_time = reference_time.replace(tzinfo=pytz.utc)
     stockholm_tz = pytz.timezone('Europe/Stockholm')
@@ -50,7 +50,11 @@ def extract_data_forecast_file(file_path):
             time_dif_hours = int(time_difference.seconds/60/60)
             time_dif_hours += time_difference.days * 24
             temperature = float(entry['t'])
-            precipitation = float(entry['tp'])
+            if type(entry['tp']) == float:
+                precipitation = float(entry['tp'])
+            else:
+                precipitation = (entry['precMax'] + entry['precMin']) / 2
+                precipitation = round(precipitation, 2)
             wind_speed = float(entry['ws'])
             extracted_data.append((city_id, website_name, local_date, time_dif_hours, temperature, precipitation, wind_speed))
     return extracted_data
@@ -68,7 +72,7 @@ def extract_data_historical_file(file_path):
     with open(file_path, 'r') as file:
         data = json.load(file)
     
-    day_series = data['daySerie']
+    day_series = data['days']
     extracted_data = []
     city_id = data['place']['geonameid']
     city_name = data['place']['place']
