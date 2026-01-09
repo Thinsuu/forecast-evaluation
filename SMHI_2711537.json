@@ -1,6 +1,6 @@
 {
   "2026-01-09": {
-    "Temp_Actual": "-4.3",
+    "Temp_Actual": "-4.2",
     "Temp_Trend": [
       null,
       null,
@@ -36,6 +36,7 @@
       -0.8,
       -0.7,
       -0.5,
+      -0.7,
       null,
       null,
       null,
@@ -99,9 +100,9 @@
       null,
       null,
       null,
-      null
+      0.0
     ],
-    "Wind_Actual": "3.1",
+    "Wind_Actual": "3.2",
     "Wind_Trend": [
       null,
       null,
@@ -137,6 +138,7 @@
       3.5,
       2.3,
       0.7,
+      2.8,
       null,
       null,
       null,
@@ -200,7 +202,7 @@
       null,
       null,
       null,
-      null
+      2.0
     ]
   },
   "2026-01-08": {
@@ -303,6 +305,7 @@
       null,
       null,
       null,
+      null,
       null
     ],
     "Wind_Actual": "2.6",
@@ -322,6 +325,7 @@
       2.4,
       0.1,
       -0.1,
+      null,
       null,
       null,
       null,
