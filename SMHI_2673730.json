@@ -1,9 +1,9 @@
 {
   "2026-01-28": {
-    "Temp_Actual": "-4.9",
+    "Temp_Actual": "-4.7",
     "Temp_Trend": [
-      null,
-      null,
+      -0.6,
+      -0.5,
       null,
       null,
       null,
@@ -26,8 +26,8 @@
       -0.3,
       -0.2,
       -0.4,
-      null,
-      null,
+      -0.6,
+      -0.8,
       null,
       -0.9,
       -0.3,
@@ -38,6 +38,8 @@
       0.5,
       0.4,
       0.5,
+      0.6,
+      1.0,
       null,
       null,
       null,
@@ -98,15 +100,13 @@
       null,
       null,
       null,
-      null,
-      null,
-      -0.8,
-      -0.8
+      -0.55,
+      -0.57
     ],
-    "Wind_Actual": "2.9",
+    "Wind_Actual": "3.0",
     "Wind_Trend": [
-      null,
-      null,
+      0.55,
+      0.6,
       null,
       null,
       null,
@@ -129,8 +129,8 @@
       0.1,
       0.2,
       0.2,
-      null,
-      null,
+      -0.4,
+      0.1,
       null,
       0.7,
       0.2,
@@ -141,6 +141,8 @@
       0.2,
       0.6,
       0.3,
+      -0.8,
+      -0.5,
       null,
       null,
       null,
@@ -201,10 +203,8 @@
       null,
       null,
       null,
-      null,
-      null,
-      0.8,
-      0.8
+      0.65,
+      0.63
     ]
   },
   "2026-01-27": {
