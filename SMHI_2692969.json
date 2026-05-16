@@ -28,7 +28,7 @@
       0.2,
       -0.1,
       0.3,
-      null,
+      0.4,
       null,
       null,
       null,
@@ -71,7 +71,7 @@
       null,
       null,
       null,
-      null,
+      0.0,
       null,
       null,
       null,
@@ -100,9 +100,9 @@
       null,
       null,
       null,
-      null
+      0.0
     ],
-    "Wind_Actual": "3.7",
+    "Wind_Actual": "3.8",
     "Wind_Trend": [
       null,
       null,
@@ -130,7 +130,7 @@
       -1.8,
       -1.6,
       1.3,
-      null,
+      2.3,
       null,
       null,
       null,
@@ -173,7 +173,7 @@
       null,
       null,
       null,
-      null,
+      1.7,
       null,
       null,
       null,
@@ -202,7 +202,7 @@
       null,
       null,
       null,
-      null
+      2.6
     ]
   },
   "2026-05-15": {
